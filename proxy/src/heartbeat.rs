@@ -123,6 +123,7 @@ pub fn heartbeat_loop_thread(
 
                         match heartbeat_result {
                             Ok(hb) => {
+                                info!("Received heartbeat response: ttl_ms = {}", hb.get_ref().ttl_ms);
                                 // retry sooner in case a heartbeat fails
                                 let new_interval = Duration::from_millis((hb.get_ref().ttl_ms / 3) as u64);
                                 if heartbeat_interval != new_interval {
