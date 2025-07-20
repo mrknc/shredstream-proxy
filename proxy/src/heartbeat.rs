@@ -13,7 +13,7 @@ use jito_protos::{
     auth::{auth_service_client::AuthServiceClient, Role},
     shredstream::{shredstream_client::ShredstreamClient, Heartbeat},
 };
-use log::{info, warn};
+use log::{info, warn, error};
 use solana_metrics::{datapoint_info, datapoint_warn};
 use solana_sdk::signature::Keypair;
 use tokio::runtime::Runtime;
@@ -64,6 +64,7 @@ pub fn heartbeat_loop_thread(
     metrics: Arc<ShredMetrics>,
     shutdown_receiver: Receiver<()>,
     exit: Arc<AtomicBool>,
+    max_failed_heartbeats: u64,
 ) -> JoinHandle<()> {
     Builder::new().name("ssPxyHbeatLoop".to_string()).spawn(move || {
         let heartbeat_socket = jito_protos::shared::Socket {
@@ -145,6 +146,10 @@ pub fn heartbeat_loop_thread(
                                     ("error_str", err.to_string(), String),
                                 );
                                 failed_heartbeat_count += 1;
+                                if failed_heartbeat_count >= max_failed_heartbeats {
+                                    error!("Failed heartbeat count reached {}. Exiting so systemd can restart the proxy.", max_failed_heartbeats);
+                                    std::process::exit(1);
+                                }
                             }
                         }
                     }

@@ -74,6 +74,10 @@ struct ShredstreamArgs {
     #[arg(long, env, value_delimiter = ',', required(true))]
     desired_regions: Vec<String>,
 
+    /// Maximum number of consecutive failed heartbeats before exiting (default: 5)
+    #[arg(long, env, default_value_t = 5)]
+    max_failed_heartbeats: u64,
+
     #[clap(flatten)]
     common_args: CommonArgs,
 }
@@ -376,5 +380,6 @@ fn start_heartbeat(
         metrics,
         shutdown_receiver.clone(),
         exit.clone(),
+        args.max_failed_heartbeats,
     )
 }
