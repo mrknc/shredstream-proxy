@@ -1,0 +1,18 @@
+i[Unit]
+Description=Jito Shredstream Proxy
+After=network.target
+
+[Service]
+Type=simple
+User=sol
+Environment="RUST_LOG=info"
+Environment="SOLHOME=/home/sol"
+ExecStart=$SOLHOME/shredstream-proxy/target/release/jito-shredstream-proxy shredstream \
+    --block-engine-url https://mainnet.block-engine.jito.wtf \
+    --auth-keypair $SOLHOME/shredstream-proxy/keypair.json \
+    --desired-regions region1,region2 \
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
